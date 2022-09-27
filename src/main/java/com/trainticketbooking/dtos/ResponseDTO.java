@@ -1,9 +1,12 @@
 package com.trainticketbooking.dtos;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
 public class ResponseDTO {
-    private Boolean isReservationMade;
+    @JsonProperty("RezervasyonYapilabilir")
+    private Boolean canBeBooked;
+    @JsonProperty("YerlesimAyrinti")
     private LayoutDetailDTO[] layoutDetails;
 }
