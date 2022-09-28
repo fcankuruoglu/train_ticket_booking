@@ -6,17 +6,14 @@ import com.trainticketbooking.dtos.RequestDTO;
 import com.trainticketbooking.dtos.ResponseDTO;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class BookingServiceImpl implements BookingService{
     @Override
     public ResponseDTO booking(RequestDTO request) {
-
         ResponseDTO response = new ResponseDTO();
-
         ArrayList<CarriageDTO> availableCarriages =  findUnder70Carriages(request.getTrain().getCarriages());
         //ArrayList<LayoutDetailDTO> layoutDetails = placedPassengers(availableCarriages, request.getNumberOfPassenger());
 
@@ -34,7 +31,7 @@ public class BookingServiceImpl implements BookingService{
     }
     // Find all carriages with an occupancy ratio less than %70.
     private ArrayList<CarriageDTO> findUnder70Carriages(CarriageDTO[] carriages){
-        ArrayList<CarriageDTO> under70Carriages= new ArrayList<CarriageDTO>();
+        ArrayList<CarriageDTO> under70Carriages= new ArrayList<>();
         for (int i = 0; i < carriages.length; i++){
             float occupancyRatio = (float) carriages[i].getOccupiedSeat() / carriages[i].getCapacity();
             if (occupancyRatio < 0.7){
@@ -55,22 +52,33 @@ public class BookingServiceImpl implements BookingService{
             tmp.setNumberOfPassenger(randomPassengers);
             tmp.setCarriageName(availableCarriages.get(randomIndex).getName());
 
-//            for(LayoutDetailDTO layoutDetail : layoutDetails){
-//                if(tmp.getCarriageName() == layoutDetail.getCarriageName()){
-//                    layoutDetail.setNumberOfPassenger(layoutDetail.getNumberOfPassenger() + randomPassengers);
-//                }
-//            }
-            // TODO: 28/09/2022 last tmp add list again. fix it.
-            for(int i=0; i<layoutDetails.size();i++){
-                if(tmp.getCarriageName() == layoutDetails.get(i).getCarriageName()){
-                    layoutDetails.get(i).setNumberOfPassenger(layoutDetails.get(i).getNumberOfPassenger() + randomPassengers);
+            if (layoutDetails.size() == 0) {
+                layoutDetails.add(tmp);
+            }else {
+                boolean stateCheck = false;
+                for(int i=0; i<layoutDetails.size();i++){
+                    if(tmp.getCarriageName() == layoutDetails.get(i).getCarriageName()){
+                        System.out.println("first: "+tmp.getCarriageName() + " --- "+layoutDetails.get(i));
+                        layoutDetails.get(i).setNumberOfPassenger(layoutDetails.get(i).getNumberOfPassenger() + randomPassengers);
+                        stateCheck = true;
+                    }
                 }
+                if (stateCheck == false) {layoutDetails.add(tmp);};
             }
-
-            //layoutDetails.add(tmp);
-            if (layoutDetails.size() == 0 || (tmp.getNumberOfPassenger() != null || tmp.getCarriageName() != null)) {layoutDetails.add(tmp);}
             numberOfPassenger = numberOfPassenger - randomPassengers;
         }
+
+        sortLayoutDetail(layoutDetails);
         return layoutDetails;
+    }
+    private void sortLayoutDetail(ArrayList<LayoutDetailDTO> list){
+        if (list.size() > 0) {
+            Collections.sort(list, new Comparator<LayoutDetailDTO>() {
+                @Override
+                public int compare(final LayoutDetailDTO object1, final LayoutDetailDTO object2) {
+                    return object1.getCarriageName().compareTo(object2.getCarriageName());
+                }
+            });
+        }
     }
 }
