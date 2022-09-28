@@ -8,7 +8,7 @@ public class RequestDTO {
     @JsonProperty("Tren")
     private TrainDTO train;
     @JsonProperty("RezervasyonYapilacakKisiSayisi")
-    private Integer numberOfPeople;
+    private Integer numberOfPassenger;
     @JsonProperty("KisilerFarkliVagonlaraYerlestirilebilir")
     private Boolean canBePlaceInDifferentCarriages;
 }
